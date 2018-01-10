@@ -39,7 +39,7 @@ $hshParams = @{username = <#USERNAME#>""; api_key = <#API KEY#>""; limit = $intR
 
 ## make API request and store JSON responses, if it fails send us an email.
 try {
-    $jsonResponse = Invoke-RestMethod -Uri $strAPIURL -Body $hshParams  | Select-Object -ExpandProperty objects | Select-Object -ExpandProperty value | Where-Object {$_.length -eq "40" -or $_.length -eq "64" -or $_.length -eq "128"}
+    $jsonResponse = Invoke-RestMethod -Uri $strAPIURL -Body $hshParams  | Select-Object -ExpandProperty objects | Select-Object -ExpandProperty value | Where-Object {$_.length -eq "32" -or $_.length -eq "40" -or $_.length -eq "64"}
 }
 catch {
     #Send-MailMessage -To $strEmailTo -SmtpServer <#SMTP Location#> -From <#REPLY ADDRESS#> -Subject "[ThreatStream IOC] - FAILURE - Unable to Obtain IOC feed for Tanium on $env:COMPUTERNAME" -Body "Check server's abililty to contact ThreatStream and re-run the task."
