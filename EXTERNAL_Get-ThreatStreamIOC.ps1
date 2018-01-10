@@ -97,7 +97,7 @@ If ($jsonResponse.count -gt 0) {
 $xmlContents = 
 @"
 <?xml version="1.0"?>
-<ioc id="$(([System.Guid]::NewGuid()).GUID)" last-modified="$strDate" xmlns="http://schemas.mandiant.com/2010/ioc" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.mandiant.com/2010/ioc ioc.xsd http://schemas.mandiant.com/2010/ioc/TR/ ioc-TR.xsd">>
+<ioc id="$(([System.Guid]::NewGuid()).GUID)" last-modified="$strDate" xmlns="http://schemas.mandiant.com/2010/ioc" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.mandiant.com/2010/ioc ioc.xsd http://schemas.mandiant.com/2010/ioc/TR/ ioc-TR.xsd">
     <short_description>ThreatStream IOC Export at $strDate</short_description>
     <description>PowerShell ThreatStream IOC Export at $strDate</description>
     <authored_by>ThreatStream</authored_by>
