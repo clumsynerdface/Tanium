@@ -6,15 +6,15 @@
     ### Cyber Security Analytics - Detection Analysis Response Team ###
     Date Updated:  28-DEC-2017
     Revision History 1.1: Corrected parsing of hashes, was missing MD5 due to length. Corrected XML format.
-    Revision History 1.0: Added CyberArk support, changed script to run from the scripting server. 
+    Revision History 1.0: Added support, changed script to run from the scripting server. 
     Version: 1.1
-    Author: Colin Nichols
+    Author: 
 
 
 .OUTPUTS
-    <Drive:>\dart\<filename>.ioc
+    <Drive:><filename>.ioc
 .NOTES
-    Runs from the DART Scripting Server (va10p50879.us.ad.wellpoint.com) via scheduled task.
+    Runs from the Scripting Server via scheduled task.
     Format of file must be in UTF8. Other file formats will not be recognized by Tanium.
     ThreatStream API limits results to 1000 total.
     Tanium Client only supports MD5, SHA1 ,and SHA256 hashes, so in the json call we check that the value length is one of those and then use a switch to create each entry.
@@ -22,13 +22,13 @@
 Try {
     $CyberPass = New-Object -ComObject "COMPasswordSDK.PasswordSDK"
     $CyberPassReq = New-Object -ComObject "COMPasswordSDK.PSDKPasswordRequest"
-    $CyberPassReq.Safe = "SVC-CSA_Automation"
-    $CyberPassReq.UserName = "dl-dartengineering@anthem.com"
-    $CyberPassReq.AppID = "CSA_Prod"
+    $CyberPassReq.Safe = "Automation"
+    $CyberPassReq.UserName = "email@email.com"
+    $CyberPassReq.AppID = "Prod"
     $CyberPassReq.Reason = "Get-ThreatStreamIOC.ps1"
 }
 Catch {
-    Send-MailMessage -To $strEmailTo -SmtpServer smtp.wellpoint.com -From noreply@anthem.com -Subject "[ThreatStream IOC] - FAILURE - Unable to Obtain IOC feed for Tanium on $env:COMPUTERNAME" -Body "Failed to load CyberArk Credentials."
+    Send-MailMessage -To $strEmailTo -SmtpServer smtp.server.com -From noreply@server.com -Subject "[ThreatStream IOC] - FAILURE - Unable to Obtain IOC feed for Tanium on $env:COMPUTERNAME" -Body "Failed to load Credentials."
     Break
 }
 ## URL of ThreatStream Intelligence API
@@ -43,7 +43,7 @@ $intConfidence = 80
 $intDaysBack = -1 #Go back to Yesterday
 ## What type of indicator (iType)
 $strTSIType = "mal_md5"
-$strEmailTo = "Colin.Nichols@anthem.com", "Kelsey.Prior@anthem.com"
+$strEmailTo = "email@server.com"
 [System.Net.ServicePointManager]::SecurityProtocol += "Tls12"
 [System.Net.ServicePointManager]::SecurityProtocol += "Tls11" #added both Tls versions for better web connectivity.
 ## format date/time stamp to match ThreatStream standards
@@ -55,12 +55,12 @@ $hshParams = @{username = $($CyberPass.GetPassword($CyberPassReq).username); api
 
 ## make API request and store JSON responses, if it fails send us an email.
 try {
-    Get-Content "\\us.ad.wellpoint.com\netlogon\Enterprise Remote Drive Mapping.cmd" | Out-Null #Do this so that if there are disconnected sessions the service account establishes a connectionw with the proxy
+    Get-Content "\\domain.com\netlogon\mapdrives.cmd" | Out-Null #Do this so that if there are disconnected sessions the service account establishes a connectionw with the proxy
     Start-Sleep -Seconds 20    
     $jsonResponse = Invoke-RestMethod -Uri $strAPIURL -Body $hshParams -ErrorVariable jsonErr | Select-Object -ExpandProperty objects | Select-Object -ExpandProperty value | Where-Object {$_.length -eq "32" -or $_.length -eq "40" -or $_.length -eq "64"}
 }
 catch {
-    Send-MailMessage -To $strEmailTo -SmtpServer smtp.wellpoint.com -From noreply@anthem.com -Subject "[ThreatStream IOC] - FAILURE - Unable to Obtain IOC feed for Tanium on $env:COMPUTERNAME" -Body "Check the Powershell Script and re-run the task. $jsonErr"
+    Send-MailMessage -To $strEmailTo -SmtpServer smtp.server.com -From noreply@server.com -Subject "[ThreatStream IOC] - FAILURE - Unable to Obtain IOC feed for Tanium on $env:COMPUTERNAME" -Body "Check the Powershell Script and re-run the task. $jsonErr"
     Exit
 }
 function New-Indicator {
@@ -139,12 +139,12 @@ If ($jsonResponse.count -gt 0) {
 
     #Write to IOC Monitored folder.
     Try {
-        $xmlContents | Out-File \\va10p51472\dart\ioc\$($strDate.Replace(":",".")).ioc -Encoding utf8 #Send to Dev
-        $xmlContents | Out-File \\va10pwvtan300\dart\ioc\$($strDate.Replace(":",".")).ioc -Encoding utf8 #Send to Prod
-        Send-MailMessage -To $strEmailTo -SmtpServer smtp.wellpoint.com -From noreply@anthem.com -Subject "[ThreatStream IOC] - SUCCESS - IOC feed for Tanium on $env:COMPUTERNAME" -Body "IOCs Imported $($jsonResponse.count):`n$($jsonResponse | ForEach-Object {"$_`n"})`nGo about your biz."
+        $xmlContents | Out-File \\server\ioc\$($strDate.Replace(":",".")).ioc -Encoding utf8 #Send to Dev
+        $xmlContents | Out-File \\tsm\ioc\$($strDate.Replace(":",".")).ioc -Encoding utf8 #Send to Prod
+        Send-MailMessage -To $strEmailTo -SmtpServer smtp.server.com -From noreply@server.com -Subject "[ThreatStream IOC] - SUCCESS - IOC feed for Tanium on $env:COMPUTERNAME" -Body "IOCs Imported $($jsonResponse.count):`n$($jsonResponse | ForEach-Object {"$_`n"})`nGo about your biz."
     }
     Catch {
-        Send-MailMessage -To $strEmailTo -SmtpServer smtp.wellpoint.com -From noreply@anthem.com -Subject "[ThreatStream IOC] - FAILED - IOC feed for Tanium on $env:COMPUTERNAME" -Body "Something went wrong writing the IOCs to ze servers."
+        Send-MailMessage -To $strEmailTo -SmtpServer smtp.server.com -From noreply@server.com -Subject "[ThreatStream IOC] - FAILED - IOC feed for Tanium on $env:COMPUTERNAME" -Body "Something went wrong writing the IOCs to ze servers."
     }
 }
 
